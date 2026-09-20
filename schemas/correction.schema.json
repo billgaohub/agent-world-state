@@ -1,0 +1,53 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/billgaohub/agent-world-state/schemas/correction.schema.json",
+  "title": "Correction",
+  "description": "Immutable correction ledger record emitted when an observation, claim, or clock skew drifts.",
+  "type": "object",
+  "required": [
+    "correction_id",
+    "target_ref",
+    "correction_type",
+    "prior_value",
+    "corrected_value",
+    "rationale"
+  ],
+  "properties": {
+    "correction_id": {
+      "type": "string",
+      "pattern": "^CORR-[A-Za-z0-9_-]+$",
+      "description": "Canonical correction record identifier (e.g. CORR-001)."
+    },
+    "target_ref": {
+      "type": "string",
+      "description": "Identifier of the target Observation, Claim, or Source being corrected."
+    },
+    "correction_type": {
+      "type": "string",
+      "enum": [
+        "PROVENANCE",
+        "TIMING",
+        "SEMANTIC",
+        "AUTHORITY_DOWNGRADE",
+        "FACTUAL",
+        "DECAY_INVALIDATION",
+        "SOURCE_DRIFT"
+      ]
+    },
+    "prior_value": {
+      "description": "Historical value prior to the correction."
+    },
+    "corrected_value": {
+      "description": "Calibrated value after physical audit or re-evaluation."
+    },
+    "rationale": {
+      "type": "string",
+      "description": "Epistemic explanation and audit rationale for the change."
+    },
+    "drift_indicator": {
+      "type": "string",
+      "description": "Trigger indicator (e.g. STALE_SOURCE_DRIFT, CLOCK_SKEW_CALIBRATION)."
+    }
+  },
+  "additionalProperties": false
+}

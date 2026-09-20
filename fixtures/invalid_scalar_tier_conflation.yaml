@@ -1,0 +1,26 @@
+observation_id: OBS-BAD-001
+topic: "Conflated Scalar Tier Simulation"
+observed_content: "Attempting to use legacy scalar tier and conflated claim state."
+
+source_authority:
+  type: SECONDARY
+  primary_permalink_pinned: false
+
+review_depth:
+  identity_pinned: true
+  metadata_verified: true
+  content_reviewed: false
+  evidence_modalities:
+    - SEARCH_QUERY_CORROBORATION
+
+temporal_context:
+  absolute_event_time: "2026-09-16T04:00:00Z"
+  collector_time: "2026-09-20T15:15:00+08:00"
+  skew_status: VALID
+
+# Banned legacy keys
+epistemic_level: TIER_3_SECONDARY_CORROBORATION
+claim_state: ACTION_OBSERVED
+observation_kind: ACTION
+claim_status: SUPPORTED
+support_level: SECONDARY_CORROBORATED

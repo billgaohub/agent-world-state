@@ -1,0 +1,122 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/billgaohub/agent-world-state/schemas/observation.schema.json",
+  "title": "Observation",
+  "description": "Atomic observation record capturing verified events, authority standing, temporal anchors, and support level.",
+  "type": "object",
+  "required": [
+    "observation_id",
+    "observed_content",
+    "observation_kind",
+    "source_authority",
+    "review_depth",
+    "temporal_context",
+    "claim_status",
+    "support_level"
+  ],
+  "properties": {
+    "observation_id": {
+      "type": "string",
+      "pattern": "^OBS-[A-Za-z0-9_-]+$",
+      "description": "Canonical observation identifier (e.g. OBS-GROKBOT-008)."
+    },
+    "topic": {
+      "type": "string",
+      "description": "Brief headline or descriptive topic."
+    },
+    "observed_content": {
+      "type": "string",
+      "description": "Factual description of what was physically observed."
+    },
+    "observation_kind": {
+      "type": "string",
+      "enum": [
+        "ACTION",
+        "STATE_CHANGE",
+        "FAILURE",
+        "INTERVENTION",
+        "RECOVERY",
+        "SPOKEN_STATEMENT",
+        "ANNOUNCEMENT"
+      ]
+    },
+    "source_ref": {
+      "type": "string",
+      "description": "Optional reference to an external Source entity."
+    },
+    "source_authority": {
+      "type": "object",
+      "required": ["type", "primary_permalink_pinned"],
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": [
+            "PRIMARY",
+            "MIRROR",
+            "SECONDARY",
+            "LOCAL_BASELINE"
+          ]
+        },
+        "primary_permalink_pinned": {
+          "type": "boolean"
+        },
+        "source_uri": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false
+    },
+    "review_depth": {
+      "type": "object",
+      "required": ["identity_pinned", "metadata_verified", "content_reviewed", "evidence_modalities"],
+      "properties": {
+        "identity_pinned": { "type": "boolean" },
+        "metadata_verified": { "type": "boolean" },
+        "content_reviewed": { "type": "boolean" },
+        "evidence_modalities": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": [
+              "FRAME_EXTRACTION",
+              "VISUAL_INSPECTION",
+              "BURNED_SUBTITLE_REVIEW",
+              "AUDIO_STREAM_PLAYBACK",
+              "REST_JSON_PAYLOAD",
+              "STATUS_EVENT_SEQUENCE",
+              "DOM_TEXT_SCRAPE",
+              "SEARCH_QUERY_CORROBORATION"
+            ]
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "temporal_context": {
+      "$ref": "temporal-context.schema.json"
+    },
+    "claim_status": {
+      "type": "string",
+      "enum": [
+        "UNTESTED",
+        "SUPPORTED",
+        "CONTRADICTED",
+        "UNKNOWN"
+      ]
+    },
+    "support_level": {
+      "type": "string",
+      "enum": [
+        "PHYSICAL_EVIDENCE_VERIFIED",
+        "SECONDARY_CORROBORATED",
+        "AUTHORITATIVE_DOC_ALIGNED",
+        "UNVERIFIED"
+      ]
+    },
+    "evidence_locator": {
+      "type": "string",
+      "description": "Abstract locator (URI, content SHA-256, or sanitized path) to physical evidence."
+    }
+  },
+  "additionalProperties": false
+}

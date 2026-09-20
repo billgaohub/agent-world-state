@@ -1,0 +1,30 @@
+observation_id: OBS-GROKBOT-008
+topic: "Teach-a-Task UI Demonstration"
+observed_content: "Hosts demonstrate cursor trace and slide animation generation using Grok Bot."
+
+source_authority:
+  type: MIRROR
+  primary_permalink_pinned: true
+  source_uri: "https://www.bilibili.com/video/BV19fYf6kELz"
+
+review_depth:
+  identity_pinned: true
+  metadata_verified: true
+  content_reviewed: true
+  evidence_modalities:
+    - FRAME_EXTRACTION
+    - VISUAL_INSPECTION
+    - BURNED_SUBTITLE_REVIEW
+
+temporal_context:
+  absolute_event_time: null
+  relative_source_offset: "T+00:48:30"
+  collector_time: "2026-09-20T15:05:00+08:00"
+  temporal_basis: STREAM_OFFSET
+  temporal_precision: SECOND
+  skew_status: VALID
+
+observation_kind: ACTION
+claim_status: SUPPORTED
+support_level: PHYSICAL_EVIDENCE_VERIFIED
+evidence_locator: "uri:https://www.bilibili.com/video/BV19fYf6kELz#t=00:48:30"

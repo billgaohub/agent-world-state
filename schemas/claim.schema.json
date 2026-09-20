@@ -1,0 +1,87 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/billgaohub/agent-world-state/schemas/claim.schema.json",
+  "title": "Claim",
+  "description": "Propositional assertion evaluated against atomic observation evidence, subject to contextual decay.",
+  "type": "object",
+  "required": [
+    "claim_id",
+    "observation_refs",
+    "statement",
+    "claim_status",
+    "support_level",
+    "confidence"
+  ],
+  "properties": {
+    "claim_id": {
+      "type": "string",
+      "pattern": "^CLM-[A-Za-z0-9_-]+$",
+      "description": "Unique claim identifier (e.g. CLM-GROKBOT-001)."
+    },
+    "observation_refs": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "List of underlying Observation IDs that support or contradict this claim."
+    },
+    "statement": {
+      "type": "string",
+      "description": "Exact propositional statement."
+    },
+    "claim_status": {
+      "type": "string",
+      "enum": [
+        "UNTESTED",
+        "SUPPORTED",
+        "CONTRADICTED",
+        "UNKNOWN"
+      ]
+    },
+    "support_level": {
+      "type": "string",
+      "enum": [
+        "PHYSICAL_EVIDENCE_VERIFIED",
+        "SECONDARY_CORROBORATED",
+        "AUTHORITATIVE_DOC_ALIGNED",
+        "UNVERIFIED"
+      ]
+    },
+    "confidence": {
+      "type": "string",
+      "enum": [
+        "LOW",
+        "MEDIUM",
+        "HIGH",
+        "VERY_HIGH"
+      ]
+    },
+    "decay_policy": {
+      "type": "object",
+      "description": "Decay governance parameters for propositional validity.",
+      "properties": {
+        "decay_type": {
+          "type": "string",
+          "enum": [
+            "FACT_DECAY",
+            "CONTEXT_DRIFT",
+            "COVERAGE_EXPIRATION",
+            "CONSENSUS_SHIFT",
+            "RANKING_DECAY",
+            "NONE"
+          ]
+        },
+        "freshness_window_seconds": {
+          "type": "number"
+        },
+        "invalidation_trigger": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false
+    },
+    "authoritative_evidence_ref": {
+      "type": "string",
+      "description": "Optional reference to primary external evidence or audit proof."
+    }
+  },
+  "additionalProperties": false
+}

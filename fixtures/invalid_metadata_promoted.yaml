@@ -1,0 +1,25 @@
+observation_id: OBS-BAD-003
+topic: "Metadata Falsely Promoted to Content Simulation"
+observed_content: "Historical GrokBot Phase 3A error: content_reviewed is false, but modalities claim visual review and physical verification."
+
+source_authority:
+  type: MIRROR
+  primary_permalink_pinned: true
+
+review_depth:
+  identity_pinned: true
+  metadata_verified: true
+  content_reviewed: false
+  # ERROR: content_reviewed is False, but claiming VISUAL_INSPECTION
+  evidence_modalities:
+    - VISUAL_INSPECTION
+
+temporal_context:
+  relative_source_offset: "00:48:30"
+  collector_time: "2026-09-20T15:00:00+08:00"
+  skew_status: VALID
+
+observation_kind: ACTION
+claim_status: SUPPORTED
+# ERROR: content_reviewed is False, but claiming PHYSICAL_EVIDENCE_VERIFIED
+support_level: PHYSICAL_EVIDENCE_VERIFIED

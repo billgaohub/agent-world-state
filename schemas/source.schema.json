@@ -1,0 +1,76 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/billgaohub/agent-world-state/schemas/source.schema.json",
+  "title": "Source",
+  "description": "Origin entity specification capturing authority standing and physical review depth.",
+  "type": "object",
+  "required": [
+    "source_id",
+    "locator",
+    "authority",
+    "review"
+  ],
+  "properties": {
+    "source_id": {
+      "type": "string",
+      "description": "Unique identifier for the source (e.g. SRC-GROKBOT-LIVE-001)."
+    },
+    "locator": {
+      "type": "string",
+      "description": "Canonical URI, URL, or endpoint identifier."
+    },
+    "authority": {
+      "type": "object",
+      "required": ["type", "primary_permalink_pinned"],
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": [
+            "PRIMARY",
+            "MIRROR",
+            "SECONDARY",
+            "LOCAL_BASELINE"
+          ]
+        },
+        "primary_permalink_pinned": {
+          "type": "boolean"
+        },
+        "provenance_chain": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      },
+      "additionalProperties": false
+    },
+    "review": {
+      "type": "object",
+      "required": ["identity_pinned", "metadata_verified", "content_reviewed", "evidence_modalities"],
+      "properties": {
+        "identity_pinned": { "type": "boolean" },
+        "metadata_verified": { "type": "boolean" },
+        "content_reviewed": { "type": "boolean" },
+        "evidence_modalities": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": [
+              "FRAME_EXTRACTION",
+              "VISUAL_INSPECTION",
+              "BURNED_SUBTITLE_REVIEW",
+              "AUDIO_STREAM_PLAYBACK",
+              "REST_JSON_PAYLOAD",
+              "STATUS_EVENT_SEQUENCE",
+              "DOM_TEXT_SCRAPE",
+              "SEARCH_QUERY_CORROBORATION"
+            ]
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "temporal": {
+      "$ref": "temporal-context.schema.json"
+    }
+  },
+  "additionalProperties": false
+}

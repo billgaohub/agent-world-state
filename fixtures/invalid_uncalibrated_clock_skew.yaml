@@ -1,0 +1,26 @@
+observation_id: OBS-BAD-002
+topic: "Uncalibrated Clock Skew Simulation"
+observed_content: "Historical MiMo ledger error: 11h 40m clock skew marked as VALID without calibration rationale."
+
+source_authority:
+  type: PRIMARY
+  primary_permalink_pinned: true
+
+review_depth:
+  identity_pinned: true
+  metadata_verified: true
+  content_reviewed: true
+  evidence_modalities:
+    - REST_JSON_PAYLOAD
+
+temporal_context:
+  absolute_event_time: "2026-09-17T12:20:11.047444Z"
+  collector_time: "2026-09-20T15:14:12+08:00"
+  published_or_observed_clock: "2026-09-17T17:00:05-07:00"
+  clock_skew_seconds: 41994
+  # ERROR: 41994s skew marked as VALID instead of CALIBRATED_WITH_DISCREPANCY_EXPLAINED
+  skew_status: VALID
+
+observation_kind: FAILURE
+claim_status: SUPPORTED
+support_level: PHYSICAL_EVIDENCE_VERIFIED

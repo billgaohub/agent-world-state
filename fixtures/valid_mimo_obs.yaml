@@ -1,0 +1,31 @@
+observation_id: OBS-MIMO-005
+topic: "Grader Deployment Network Disconnect & Run Restart"
+observed_content: "Notice n-15ac72 confirms network connectivity failure between pro cluster and grader deployment."
+
+source_authority:
+  type: PRIMARY
+  primary_permalink_pinned: true
+  source_uri: "https://mimo.xiaomi.com/rl/api/notices"
+
+review_depth:
+  identity_pinned: true
+  metadata_verified: true
+  content_reviewed: true
+  evidence_modalities:
+    - REST_JSON_PAYLOAD
+    - STATUS_EVENT_SEQUENCE
+
+temporal_context:
+  absolute_event_time: "2026-09-17T12:20:11.047444Z"
+  relative_source_offset: "step: 14 -> restart -> step: 15"
+  collector_time: "2026-09-20T15:14:12+08:00"
+  published_or_observed_clock: "2026-09-17T17:00:05-07:00"
+  temporal_basis: API_PAYLOAD_EPOCH
+  temporal_precision: MILLISECOND
+  clock_skew_seconds: 41994
+  skew_status: CALIBRATED_WITH_DISCREPANCY_EXPLAINED
+
+observation_kind: FAILURE
+claim_status: SUPPORTED
+support_level: PHYSICAL_EVIDENCE_VERIFIED
+evidence_locator: "sha256:7d245e1aac5f00c5fbd6a1475e5f5d4c1b09b54996eaae3c8d5bc910f2a75f9e"

@@ -1,0 +1,24 @@
+observation_id: OBS-BAD-004
+topic: "Unpinned Secondary Promoted to Physical Verification Simulation"
+observed_content: "Historical MiMo Event A error: Secondary press search results promoted to physical evidence verification."
+
+source_authority:
+  type: SECONDARY
+  primary_permalink_pinned: false
+
+review_depth:
+  identity_pinned: false
+  metadata_verified: true
+  content_reviewed: true
+  evidence_modalities:
+    - SEARCH_QUERY_CORROBORATION
+
+temporal_context:
+  absolute_event_time: "2026-09-16T04:00:00Z"
+  collector_time: "2026-09-20T15:15:00+08:00"
+  skew_status: VALID
+
+observation_kind: ANNOUNCEMENT
+claim_status: SUPPORTED
+# ERROR: Secondary unpinned source cannot claim PHYSICAL_EVIDENCE_VERIFIED
+support_level: PHYSICAL_EVIDENCE_VERIFIED

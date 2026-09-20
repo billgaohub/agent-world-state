@@ -1,0 +1,64 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/billgaohub/agent-world-state/schemas/temporal-context.schema.json",
+  "title": "TemporalContext",
+  "description": "Decoupled temporal context separating source event epoch, observer UI clock, and local collector timestamp.",
+  "type": "object",
+  "required": [
+    "collector_time",
+    "skew_status"
+  ],
+  "properties": {
+    "absolute_event_time": {
+      "type": ["string", "null"],
+      "format": "date-time",
+      "description": "ISO 8601 UTC timestamp of origin event if system epoch is provided."
+    },
+    "relative_source_offset": {
+      "type": ["string", "null"],
+      "description": "Relative stream offset (e.g. T+00:48:30) or step index (e.g. step: 15)."
+    },
+    "collector_time": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Mandatory local wall-clock execution time when observer captured the observation."
+    },
+    "published_or_observed_clock": {
+      "type": ["string", "null"],
+      "description": "Display timestamp or header clock visible on UI/dashboard at observation time."
+    },
+    "temporal_basis": {
+      "type": "string",
+      "enum": [
+        "STREAM_OFFSET",
+        "WALL_CLOCK_HEADER",
+        "API_PAYLOAD_EPOCH",
+        "STEP_INDEX"
+      ]
+    },
+    "temporal_precision": {
+      "type": "string",
+      "enum": [
+        "MILLISECOND",
+        "SECOND",
+        "MINUTE",
+        "STEP",
+        "APPROXIMATE"
+      ]
+    },
+    "clock_skew_seconds": {
+      "type": ["number", "null"],
+      "description": "Numeric delta in seconds between published clock and source event time."
+    },
+    "skew_status": {
+      "type": "string",
+      "enum": [
+        "VALID",
+        "CALIBRATED_WITH_DISCREPANCY_EXPLAINED",
+        "UNKNOWN_SKEW",
+        "NOT_APPLICABLE"
+      ]
+    }
+  },
+  "additionalProperties": false
+}
