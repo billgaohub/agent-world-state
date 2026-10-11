@@ -116,7 +116,21 @@
     "evidence_locator": {
       "type": "string",
       "description": "Abstract locator (URI, content SHA-256, or sanitized path) to physical evidence."
+    },
+    "writer_id": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128,
+      "description": "Identifier of the agent or human that authored this observation (e.g. 'm', 'grokbot', 'bill'). Optional. Required when 'signature' is present."
+    },
+    "signature": {
+      "type": "string",
+      "pattern": "^[0-9a-fA-F]{128}$",
+      "description": "Ed25519 signature (hex-encoded, 64 bytes) over the canonical JSON serialization of this observation EXCLUDING the 'signature' field itself (sorted keys, compact separators, UTF-8). Optional. Requires 'writer_id'."
     }
+  },
+  "dependentRequired": {
+    "signature": ["writer_id"]
   },
   "additionalProperties": false
 }

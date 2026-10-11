@@ -1,0 +1,28 @@
+observation_id: OBS-AIOBN-PR73
+topic: 'aiobn-site PR #73 merged: Reality concept freeze doc'
+observed_content: 'GitHub PR billgaohub/aiobn-site#73 ''docs: Reality 总概念冻结纪要（2026-10-11）''
+  state=MERGED at 2026-10-11T04:34:29Z, merge commit b4d023c71d461c1c73fbd421f0c86cd54d32285a.
+  Verified via gh pr view 2026-10-11; payload fields (number/title/state/mergedAt/mergeCommit)
+  read in full.'
+observation_kind: STATE_CHANGE
+source_authority:
+  type: PRIMARY
+  primary_permalink_pinned: true
+  source_uri: https://github.com/billgaohub/aiobn-site/pull/73
+review_depth:
+  identity_pinned: true
+  metadata_verified: true
+  content_reviewed: true
+  evidence_modalities:
+  - REST_JSON_PAYLOAD
+temporal_context:
+  absolute_event_time: '2026-10-11T04:34:29Z'
+  collector_time: '2026-10-11T04:46:44Z'
+  temporal_basis: API_PAYLOAD_EPOCH
+  temporal_precision: SECOND
+  skew_status: VALID
+claim_status: SUPPORTED
+support_level: PHYSICAL_EVIDENCE_VERIFIED
+evidence_locator: gh pr view 73 --repo billgaohub/aiobn-site --json number,title,state,mergedAt,mergeCommit
+  (2026-10-11)
+signature: 038242f4ac18f5961fb07c91af6427566b141d1fd3450d07db89c94dcdb1c102e015abd71610853b5ef2e4dba8231643127571e78eaef284587eb1796c8dd305

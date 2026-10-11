@@ -10,12 +10,17 @@ Rules Enforced:
 4. Temporal Decoupling: collector_time required; at least one of absolute_event_time or relative_source_offset must exist.
 5. Clock Skew Integrity: If clock_skew_seconds > 60s, skew_status must be CALIBRATED_WITH_DISCREPANCY_EXPLAINED.
 6. Forbidden Legacy Keys: Rejects scalar 'epistemic_level', 'claim_state' (conflated), and monolithic 'VIDEO_AUDIO_PLAYBACK'.
+7. (v0.2) Signature Coherence: 'signature' without 'writer_id' is rejected (a signature must be attributable).
+8. (v0.2) Optional Signature Verification: with --verify-sig PUBKEY_HEX, a present signature is verified
+   ed25519 against the canonical serialization (doc minus 'signature', sorted-keys compact JSON, UTF-8);
+   mismatch is fail-closed. Absent signature = no check (backward compatible).
 """
 
 import sys
 import yaml
+import json
 from pathlib import Path
-from typing import Dict, Any, List
+from typing import Dict, Any, List, Tuple
 
 VALID_AUTHORITY_TYPES = {"PRIMARY", "MIRROR", "SECONDARY", "LOCAL_BASELINE"}
 VALID_OBSERVATION_KINDS = {"ACTION", "STATE_CHANGE", "FAILURE", "INTERVENTION", "RECOVERY", "SPOKEN_STATEMENT", "ANNOUNCEMENT"}
@@ -130,19 +135,68 @@ def validate_entry(doc: Dict[str, Any]) -> List[str]:
             errors.append(ValidationError("ERR_UNPINNED_SECONDARY_PHYSICAL_CLAIM", 
                 "Cannot claim support_level: PHYSICAL_EVIDENCE_VERIFIED for unpinned SECONDARY source.").args[0])
 
+    # Rule 7 (v0.2): Signature Coherence — a signature must be attributable to a writer
+    if doc.get("signature") and not doc.get("writer_id"):
+        errors.append(ValidationError("ERR_SIGNATURE_WITHOUT_WRITER",
+            "Field 'signature' present but 'writer_id' missing. A signature must be attributable to a writer.").args[0])
+
     return errors
 
-def validate_file(filepath: Path) -> bool:
-    print(f"--> Validating {filepath.name} ... ", end="")
+def canonical_observation_bytes(doc: Dict[str, Any]) -> bytes:
+    """Canonical serialization for signing: the observation minus 'signature',
+    JSON with sorted keys, compact separators, UTF-8. Deterministic across encoders."""
+    payload = {k: v for k, v in doc.items() if k != "signature"}
+    return json.dumps(payload, sort_keys=True, separators=(",", ":"), ensure_ascii=False).encode("utf-8")
+
+def verify_observation_signature(doc: Dict[str, Any], pubkey_hex: str) -> Tuple[bool, str]:
+    """Verify ed25519 signature over canonical bytes. Soft dependency on pynacl:
+    returns (False, reason) instead of raising when the library is unavailable.
+    Absent signature is NOT an error here (callers decide whether to require it)."""
+    sig = doc.get("signature")
+    if not sig:
+        return (True, "no signature present; nothing to verify")
+    if not doc.get("writer_id"):
+        return (False, "signature present but writer_id missing")
     try:
-        data = yaml.safe_load(filepath.read_text(encoding="utf-8"))
+        from nacl.signing import VerifyKey
+        from nacl.encoding import HexEncoder
+        from nacl.exceptions import BadSignatureError
+    except ImportError:
+        return (False, "pynacl not installed; cannot verify ed25519 signature (pip install pynacl)")
+    try:
+        vk = VerifyKey(pubkey_hex, encoder=HexEncoder)
+        vk.verify(canonical_observation_bytes(doc), bytes.fromhex(sig))
+        return (True, "signature valid")
+    except BadSignatureError:
+        return (False, "signature INVALID (fail-closed)")
     except Exception as e:
-        print(f"FAILED (YAML parse error: {e})")
+        return (False, f"signature verification error: {e}")
+
+def load_doc(filepath: Path):
+    try:
+        return yaml.safe_load(filepath.read_text(encoding="utf-8"))
+    except Exception as e:
+        print(f"--> Validating {filepath.name} ... FAILED (YAML parse error: {e})")
+        return None
+
+def validate_file(filepath: Path, verify_pubkey: str = None) -> bool:
+    print(f"--> Validating {filepath.name} ... ", end="")
+    data = load_doc(filepath)
+    if data is None:
         return False
 
     errors = validate_entry(data)
+
+    # Rule 8 (v0.2): optional signature verification, fail-closed on mismatch
+    if verify_pubkey and isinstance(data, dict) and data.get("signature"):
+        ok, reason = verify_observation_signature(data, verify_pubkey)
+        if ok:
+            print(f"(signature OK) ", end="")
+        else:
+            errors.append(ValidationError("ERR_SIGNATURE_INVALID", reason).args[0])
+
     if not errors:
-        print("PASS (Complies with Schema v0.1.0)")
+        print("PASS (Complies with Schema v0.1.0+)")
         return True
     else:
         print("FAIL-CLOSED (Errors detected):")
@@ -151,18 +205,37 @@ def validate_file(filepath: Path) -> bool:
         return False
 
 if __name__ == "__main__":
-    if len(sys.argv) < 2:
-        print("Usage: validator.py <path_to_fixture.yaml> [more_fixtures...]")
+    argv = sys.argv[1:]
+    verify_pubkey = None
+    files = []
+    i = 0
+    while i < len(argv):
+        if argv[i] == "--verify-sig":
+            i += 1
+            if i >= len(argv):
+                print("Usage: validator.py [--verify-sig PUBKEY_HEX] <path_to_fixture.yaml> [more_fixtures...]")
+                sys.exit(2)
+            verify_pubkey = argv[i]
+        elif argv[i] in ("-h", "--help"):
+            print("Usage: validator.py [--verify-sig PUBKEY_HEX] <path_to_fixture.yaml> [more_fixtures...]")
+            print("  --verify-sig PUBKEY_HEX  verify ed25519 signatures (hex pubkey); mismatch is fail-closed.")
+            sys.exit(0)
+        else:
+            files.append(argv[i])
+        i += 1
+
+    if not files:
+        print("Usage: validator.py [--verify-sig PUBKEY_HEX] <path_to_fixture.yaml> [more_fixtures...]")
         sys.exit(2)
 
     all_passed = True
-    for arg in sys.argv[1:]:
+    for arg in files:
         p = Path(arg)
         if not p.exists():
             print(f"File not found: {p}")
             all_passed = False
             continue
-        if not validate_file(p):
+        if not validate_file(p, verify_pubkey):
             all_passed = False
 
     sys.exit(0 if all_passed else 1)
