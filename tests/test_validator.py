@@ -13,10 +13,21 @@ REPO_ROOT = Path(__file__).resolve().parent.parent
 VALIDATOR_PY = REPO_ROOT / "validator" / "validator.py"
 FIXTURES_DIR = REPO_ROOT / "fixtures"
 
+# PILOT experimental ed25519 public key (test-only, 2026-10-11 dogfood round 2).
+# The private key was generated ephemerally, labeled PILOT-EXPERIMENTAL-ONLY,
+# kept in /tmp, and never committed to the repo. This public key is not a secret.
+PILOT_PUBKEY_HEX = "134fd3d3f5d8e349cfc0cc2524011b05b9d23d51c37af07ca25ec25b7e93e53e"
+
 class TestValidator(unittest.TestCase):
 
     def run_validator(self, *fixture_names) -> subprocess.CompletedProcess:
         cmd = [sys.executable, str(VALIDATOR_PY)]
+        for name in fixture_names:
+            cmd.append(str(FIXTURES_DIR / name))
+        return subprocess.run(cmd, capture_output=True, text=True)
+
+    def run_validator_with_sig(self, pubkey_hex, *fixture_names) -> subprocess.CompletedProcess:
+        cmd = [sys.executable, str(VALIDATOR_PY), "--verify-sig", pubkey_hex]
         for name in fixture_names:
             cmd.append(str(FIXTURES_DIR / name))
         return subprocess.run(cmd, capture_output=True, text=True)
@@ -75,6 +86,43 @@ class TestValidator(unittest.TestCase):
         """Test batch run with only valid fixtures exits with code 0."""
         res = self.run_validator("valid_grokbot_obs.yaml", "valid_mimo_obs.yaml")
         self.assertEqual(res.returncode, 0)
+        self.assertNotIn("FAIL-CLOSED", res.stdout)
+
+    # ---- v0.2: writer_id + signature ----
+
+    def test_signed_fixture_passes_without_flag(self):
+        """Backward compat: signed fixture passes without --verify-sig (signature ignored)."""
+        res = self.run_validator("valid_signed_obs.yaml")
+        self.assertEqual(res.returncode, 0, f"Output:\n{res.stdout}\n{res.stderr}")
+        self.assertIn("PASS", res.stdout)
+        self.assertNotIn("FAIL-CLOSED", res.stdout)
+
+    def test_signed_fixture_signature_verifies(self):
+        """Round-2 dogfood: real PR #73 observation verifies against pilot pubkey."""
+        res = self.run_validator_with_sig(PILOT_PUBKEY_HEX, "valid_signed_obs.yaml")
+        self.assertEqual(res.returncode, 0, f"Output:\n{res.stdout}\n{res.stderr}")
+        self.assertIn("signature OK", res.stdout)
+        self.assertNotIn("FAIL-CLOSED", res.stdout)
+
+    def test_tampered_signature_fail_closed(self):
+        """Flipped hex digit must fail closed with ERR_SIGNATURE_INVALID."""
+        res = self.run_validator_with_sig(PILOT_PUBKEY_HEX, "invalid_sig_tampered.yaml")
+        self.assertEqual(res.returncode, 1, f"Output:\n{res.stdout}")
+        self.assertIn("FAIL-CLOSED", res.stdout)
+        self.assertIn("ERR_SIGNATURE_INVALID", res.stdout)
+
+    def test_signature_without_writer_fail_closed(self):
+        """Signature without writer_id must fail closed (unattributable signature)."""
+        res = self.run_validator("invalid_sig_no_writer.yaml")
+        self.assertEqual(res.returncode, 1, f"Output:\n{res.stdout}")
+        self.assertIn("FAIL-CLOSED", res.stdout)
+        self.assertIn("ERR_SIGNATURE_WITHOUT_WRITER", res.stdout)
+
+    def test_unsigned_fixture_ignores_verify_flag(self):
+        """Legacy fixture with --verify-sig still passes (no signature = no check)."""
+        res = self.run_validator_with_sig(PILOT_PUBKEY_HEX, "valid_grokbot_obs.yaml")
+        self.assertEqual(res.returncode, 0, f"Output:\n{res.stdout}\n{res.stderr}")
+        self.assertIn("PASS", res.stdout)
         self.assertNotIn("FAIL-CLOSED", res.stdout)
 
 if __name__ == "__main__":

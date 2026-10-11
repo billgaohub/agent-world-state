@@ -1,4 +1,4 @@
-# agent-world-state Specification (v0.1.0)
+# agent-world-state Specification (v0.2.0-draft)
 
 **Status**: EXPERIMENTAL / EMPIRICALLY_DERIVED  
 **Lineage**: Derived from 2 heterogeneous field studies (GrokBot multimodal live broadcast and Xiaomi MiMo-V2.6 distributed RL training infrastructure); not an arbitrary universal standard.  
@@ -116,6 +116,31 @@ Append-only revision ledger entry:
 - `prior_value`: Value before correction.
 - `corrected_value`: Calibrated value.
 - `rationale`: Epistemic explanation and audit justification.
+
+### 3.4 Writer Identity & Signature (v0.2, optional)
+
+Two optional Observation fields closing the round-1 dogfood gap (validator covered only
+1 of 3 triple members; observations had no writer/signer identity):
+
+- `writer_id` (string, 1–128 chars): identifier of the agent or human that authored the
+  observation (e.g. `m`, `grokbot`, `bill`). Optional; **required when `signature` is present**
+  (schema `dependentRequired`; validator rule 7 rejects unattributable signatures fail-closed).
+- `signature` (string, 128 hex chars): **Ed25519** signature over the canonical serialization
+  of the observation **excluding `signature` itself**. Optional.
+
+**Canonicalization (signing input)**: JSON object of all observation fields except `signature`,
+keys sorted lexicographically, compact separators (`,` and `:` with no whitespace),
+UTF-8 encoded, `ensure_ascii=False`. Deterministic across encoders; any encoder producing
+these exact bytes verifies.
+
+**Verification**: `validator.py --verify-sig <PUBKEY_HEX>` verifies present signatures and
+fails closed on mismatch (`ERR_SIGNATURE_INVALID`). Without the flag, signatures are ignored
+(full backward compatibility: v0.1.0 observations without these fields still PASS).
+Signature verification is a soft dependency (`pynacl`); the core fail-closed rules never
+require it.
+
+**Key management (pilot scope)**: v0.2 uses explicitly-labeled PILOT experimental keys only.
+Production trust-root assignment is a separate governance decision (out of scope for this spec).
 
 ---
 
